@@ -40,7 +40,7 @@ CREATE TABLE Permanent_Staff (
 
     CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
     CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
-    CONSTRAINT Leaving_Date CHECK (Start_Date >= Start_Date)
+    CONSTRAINT Leaving_Date CHECK (Leaving_Date >= Start_Date)
 );
 
 CREATE TABLE Temporary_Staff (
@@ -60,7 +60,7 @@ CREATE TABLE Temporary_Staff (
 
     CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
     CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
-    CONSTRAINT Leaving_Date CHECK (Start_Date >= Start_Date),
+    CONSTRAINT Leaving_Date CHECK (Leaving_Date >= Start_Date),
     CONSTRAINT Max_Weekly_Hours CHECK (Max_Weekly_Hours <= 48)
 );
 
@@ -85,9 +85,9 @@ CREATE TABLE Room (
 
     FOREIGN KEY (Venue_ID) REFERENCES Venue(Venue_ID),
 
-    CONSTRAINT Meeting_Capacity CHECK (VALUE <= 1000),
-    CONSTRAINT Standing_Capacity CHECK (VALUE <= 1000),
-    CONSTRAINT Banguet_Capacity CHECK (VALUE <= 1000)
+    CONSTRAINT Meeting_Capacity CHECK (Meeting_Capacity <= 1000),
+    CONSTRAINT Standing_Capacity CHECK (Standing_Capacity <= 1000),
+    CONSTRAINT Banguet_Capacity CHECK (Banguet_Capacity <= 1000)
 );
 
 CREATE TABLE Client (
@@ -113,8 +113,8 @@ CREATE TABLE Event (
     FOREIGN KEY (Client_No) REFERENCES Client(Client_No),
     FOREIGN KEY (Event_Manager_ID) REFERENCES Permanent_Staff(Staff_No),
 
-    CONSTRAINT Number_Adults CHECK (VALUE >= 20),
-    CONSTRAINT Management_Fee CHECK (VALUE >= 0)
+    CONSTRAINT Number_Adults CHECK (Number_Adults >= 20),
+    CONSTRAINT Management_Fee CHECK (Management_Fee >= 0)
 );
 
 CREATE TABLE Room_Reservation (
@@ -126,7 +126,7 @@ CREATE TABLE Room_Reservation (
     FOREIGN KEY (Event_No) REFERENCES Event(Event_No),
     FOREIGN KEY (Room_ID) REFERENCES Room(Room_ID),
 
-    CONSTRAINT Start_DateTime CHECK (VALUE <= End_DateTime)
+    CONSTRAINT Start_DateTime CHECK (Start_DateTime <= End_DateTime)
 );
 
 CREATE TABLE Event_Temp_Staff (

@@ -38,9 +38,9 @@ CREATE TABLE Permanent_Staff (
     Account_No VARCHAR(8) NOT NULL,
     Sort_Code VARCHAR(6) NOT NULL,
 
-    CONSTRAINT DOB CHECK (DOB <= Start_Date - interval "18 years"),
-    CONSTRAINT Start_Date CHECK (VALUE >= CURRENT_DATE),
-    CONSTRAINT Leaving_Date CHECK (VALUE >= Start_Date),
+    CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
+    CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
+    CONSTRAINT Leaving_Date CHECK (Start_Date >= Start_Date)
 );
 
 CREATE TABLE Temporary_Staff (
@@ -58,10 +58,10 @@ CREATE TABLE Temporary_Staff (
     Hourly_Rate DECIMAL(5,2) NOT NULL,
     Max_Weekly_Hours INT NOT NULL,
 
-    CONSTRAINT DOB CHECK (DOB <= Start_Date - interval "18 years"),
-    CONSTRAINT Start_Date CHECK (VALUE >= CURRENT_DATE),
-    CONSTRAINT Leaving_Date CHECK (VALUE >= Start_Date),
-    CONSTRAINT Max_Weekly_Hours CHECK (VALUE <= 48),
+    CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
+    CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
+    CONSTRAINT Leaving_Date CHECK (Start_Date >= Start_Date),
+    CONSTRAINT Max_Weekly_Hours CHECK (Max_Weekly_Hours <= 48)
 );
 
 CREATE TABLE Venue (
@@ -83,11 +83,11 @@ CREATE TABLE Room (
     Standing_Capacity INT NOT NULL,
     Banguet_Capacity INT NOT NULL,
 
-    FOREIGN KEY (Venue_ID) REFERENCES Venue(Venue_ID)
+    FOREIGN KEY (Venue_ID) REFERENCES Venue(Venue_ID),
 
     CONSTRAINT Meeting_Capacity CHECK (VALUE <= 1000),
     CONSTRAINT Standing_Capacity CHECK (VALUE <= 1000),
-    CONSTRAINT Banguet_Capacity CHECK (VALUE <= 1000),
+    CONSTRAINT Banguet_Capacity CHECK (VALUE <= 1000)
 );
 
 CREATE TABLE Client (
@@ -95,7 +95,7 @@ CREATE TABLE Client (
     Client_Name VARCHAR(255) NOT NULL,
     Company_Name VARCHAR(255) NOT NULL,
     Contact_No VARCHAR(11) NOT NULL,
-    Contact_Email VARCHAR(255) NOT NULL,
+    Contact_Email VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Event (
@@ -126,7 +126,7 @@ CREATE TABLE Room_Reservation (
     FOREIGN KEY (Event_No) REFERENCES Event(Event_No),
     FOREIGN KEY (Room_ID) REFERENCES Room(Room_ID),
 
-    CONSTRAINT Start_DateTime CHECK (VALUE <= End_DateTime),
+    CONSTRAINT Start_DateTime CHECK (VALUE <= End_DateTime)
 );
 
 CREATE TABLE Event_Temp_Staff (

@@ -216,12 +216,22 @@ SELECT login, name FROM (VALUES('am2660', 'Andrew Meyer')) AS t1(login, name);
 -- 2.1 List all room reservations that last for longer than 8 hours, include
 --     the room_name, event_type, as well as client_name and company_name.
 
-
+SELECT room_name, event_type, client_name, company_name
+FROM room_reservation
+  JOIN room ON room_reservation.room_id = room.room_id
+  JOIN event ON room_reservation.event_no = event.event_no
+  JOIN client ON event.client_no = client.client_no
+WHERE end_date_time > (start_date_time + interval '8 hours');
 
 -- 2.2 Who are the three temporary staff members that have worked the most hours?
 --     Show their first_name, surname, and the total number of hours worked.
 
-
+SELECT first_name, surname, SUM(hours_worked)
+FROM temporary_staff
+    JOIN event_temp_staff ON temporary_staff.staff_no = event_temp_staff.staff_no
+GROUP BY first_name, surname
+ORDER BY SUM(hours_worked) DESC
+LIMIT 3;
 
 -- 2.3 Take your answer for 2.2 and modify it to show the 2 temporary staff
 --     members with the fewest hours worked, but show the results so that

@@ -36,10 +36,9 @@ CREATE TABLE Permanent_Staff (
     NIN VARCHAR(9) UNIQUE NOT NULL,
     Annual_Salary DECIMAL(8,2) NOT NULL,
     Account_No VARCHAR(8) NOT NULL,
-    Sort_Code VARCHAR(6) NOT NULL,
+    Sort_Code VARCHAR NOT NULL,
 
     CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
-    CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
     CONSTRAINT Leaving_Date CHECK (Leaving_Date >= Start_Date)
 );
 
@@ -59,7 +58,6 @@ CREATE TABLE Temporary_Staff (
     Max_Weekly_Hours INT NOT NULL,
 
     CONSTRAINT DOB CHECK (DOB < (current_date - interval '18' year)),
-    CONSTRAINT Start_Date CHECK (Start_Date >= CURRENT_DATE),
     CONSTRAINT Leaving_Date CHECK (Leaving_Date >= Start_Date),
     CONSTRAINT Max_Weekly_Hours CHECK (Max_Weekly_Hours <= 48)
 );
@@ -68,7 +66,7 @@ CREATE TABLE Venue (
     Venue_ID INT PRIMARY KEY NOT NULL,
     Venue_Name VARCHAR(255) NOT NULL,
     Address VARCHAR(255) NOT NULL,
-    Postcode VARCHAR(6) NOT NULL,
+    Postcode VARCHAR NOT NULL,
     Manager_ID INT,
 
     FOREIGN KEY (Manager_ID) REFERENCES Permanent_Staff(Staff_No)
@@ -81,7 +79,7 @@ CREATE TABLE Room (
     Description VARCHAR(255) NOT NULL,
     Meeting_Capacity INT NOT NULL,
     Standing_Capacity INT NOT NULL,
-    Banguet_Capacity INT NOT NULL,
+    Banquet_Capacity INT NOT NULL,
 
     FOREIGN KEY (Venue_ID) REFERENCES Venue(Venue_ID),
 
@@ -94,7 +92,7 @@ CREATE TABLE Client (
     Client_No INT PRIMARY KEY NOT NULL,
     Client_Name VARCHAR(255) NOT NULL,
     Company_Name VARCHAR(255) NOT NULL,
-    Contact_No VARCHAR(11) NOT NULL,
+    Contact_Number VARCHAR(11) NOT NULL,
     Contact_Email VARCHAR(255) NOT NULL
 );
 
@@ -118,10 +116,12 @@ CREATE TABLE Event (
 );
 
 CREATE TABLE Room_Reservation (
-    Event_No INT PRIMARY KEY NOT NULL,
-    Room_ID INT PRIMARY KEY NOT NULL,
-    Start_DateTime DATE PRIMARY KEY NOT NULL,
-    End_DateTime DATE NOT NULL,
+    Event_No INT NOT NULL,
+    Room_ID INT NOT NULL,
+    Start_Date_Time DATE NOT NULL,
+    End_Date_Time DATE NOT NULL,
+
+    PRIMARY KEY (Event_No, Room_ID, Start_DateTime),
 
     FOREIGN KEY (Event_No) REFERENCES Event(Event_No),
     FOREIGN KEY (Room_ID) REFERENCES Room(Room_ID),
@@ -211,7 +211,7 @@ INSERT INTO Event_Temp_Staff (timesheet_id, staff_no, event_no, hours_worked) VA
 --     Hint: In PostgreSQL, SELECT statements can return constant values
 --     without needing to fetch data from a specific table.
 
-
+SELECT login, name FROM (VALUES('am2660', 'Andrew Meyer')) AS t1(login, name);
 
 -- 2.1 List all room reservations that last for longer than 8 hours, include
 --     the room_name, event_type, as well as client_name and company_name.

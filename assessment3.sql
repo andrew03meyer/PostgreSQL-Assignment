@@ -237,18 +237,26 @@ LIMIT 3;
 --     members with the fewest hours worked, but show the results so that
 --     the staff member with more hours worked is listed first.
 
-
+SELECT *
+FROM (
+    SELECT first_name, surname, SUM(hours_worked) AS total
+    FROM temporary_staff
+    JOIN event_temp_staff ON temporary_staff.staff_no = event_temp_staff.staff_no
+    GROUP BY first_name, surname
+    ORDER BY total ASC
+    LIMIT 2
+) AS lowest_2
+ORDER BY total DESC;
 
 -- 2.4 The following query was written to give the list of clients who have
 --     booked enough events to have at least 100 participants in total.
 --     However, it only lists the clients who have booked events with
 --     at least 100 adults. Please rewrite the query to fix all problems.
+
 SELECT c.client_name, c.company_name
 FROM Client c
   JOIN Event e ON c.client_no = e.client_no
-WHERE e.number_adults >= 100;
-
-
+WHERE e.number_adults + e.number_children >= 100;
 
 -- 2.5 After each event, you'll need to produce an invoice.  Write a query that
 --     calculates the total billable cost of each event *based on the cost of
@@ -257,7 +265,15 @@ WHERE e.number_adults >= 100;
 --     the total_cost, list all_fees and staff_costs as columns so they
 --     can be included on the invoice.
 
-
+SELECT *
+FROM (
+    SELECT e.event_no, c.client_name, c.company_name, SUM(ts.hourly_rate * ets.hours_worked)
+    FROM Event e
+        JOIN client c ON c.client_no = e.client_no
+        JOIN event_temp_staff ets ON ets.event_no = e.event_no
+        JOIN temporary_staff ts ON ts.Staff_No = ets.staff_no
+    GROUP BY e.event_no
+) AS t1;
 
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,
 --     and return a single value, i.e. a single row, with the column total_staff_costs.

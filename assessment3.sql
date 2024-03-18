@@ -265,15 +265,29 @@ WHERE e.number_adults + e.number_children >= 100;
 --     the total_cost, list all_fees and staff_costs as columns so they
 --     can be included on the invoice.
 
+--         JOIN client c ON c.client_no = e.client_no
+--        JOIN event_temp_staff ets ON ets.event_no = e.event_no
+--        JOIN temporary_staff ts ON ts.Staff_No = ets.staff_no
+
+
+-- Working code for staff costs
 SELECT *
 FROM (
-    SELECT e.event_no, c.client_name, c.company_name, SUM(ts.hourly_rate * ets.hours_worked)
-    FROM Event e
-        JOIN client c ON c.client_no = e.client_no
-        JOIN event_temp_staff ets ON ets.event_no = e.event_no
-        JOIN temporary_staff ts ON ts.Staff_No = ets.staff_no
-    GROUP BY e.event_no
+    SELECT ts.staff_no, SUM(ets.hours_worked * ts.hourly_rate)
+    FROM event as e
+    JOIN event_temp_staff ets ON ets.event_no = e.event_no
+    JOIN temporary_staff ts ON ts.Staff_No = ets.staff_no
+    GROUP BY ts.staff_no
 ) AS t1;
+
+ -- staff_no |  sum
+----------+--------
+    --    4 |  50.00
+   --     3 | 130.00
+  --      1 | 150.00
+ --       5 |  70.00
+--        2 | 130.00
+
 
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,
 --     and return a single value, i.e. a single row, with the column total_staff_costs.

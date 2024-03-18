@@ -279,21 +279,30 @@ GROUP BY ets_ts.event_no, e.management_fee, c.client_name, c.company_name;
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,
 --     and return a single value, i.e. a single row, with the column total_staff_costs.
 
-
+SELECT SUM(t1.staff_total) AS total_staff_costs
+FROM (
+SELECT SUM(ets.hours_worked * ts.hourly_rate) staff_total
+    FROM event_temp_staff as ets
+    JOIN temporary_staff as ts ON ts.staff_no = ets.staff_no
+    GROUP BY ets.staff_no, ets.event_no
+) AS t1;
 
 -- 2.7 As part of a promotion for new clients, you won't charge management fees
 --     for events with a booking date in March 2024.
 --     Please update the database to adjust the management fees.
 --     Using knowledge about the concrete data, e.g., ids or names, will result in 0 marks.
 
-
+UPDATE event
+set management_fee = 0
+WHERE EXTRACT(MONTH from booking_date) = 3;
 
 -- 2.8 Thanks to the promotion for new clients, you're just off the phone with
 --     Betty Michelson (michelson@kent-hikes.co.uk) of Kent Hikes Ltd.
 --     She wants to eventually organize a reception. For now, please add her as a new client.
 --     Her contact number is 012270000000.
 
-
+INSERT INTO client(client_no, client_name, company_name, contact_number, contact_email)
+VALUES (6, 'Betty Michelson', 'Kent Hikes Ltd', '01227000000', 'michelson@kent-hikes.co.uk');
 
 -- 2.9 Please write a query that returns a column (used_ai) with either TRUE or FALSE
 --     to indicate whether you used an AI assistant to help you write the query.
@@ -303,6 +312,8 @@ GROUP BY ets_ts.event_no, e.management_fee, c.client_name, c.company_name;
 --     Hint: In PostgreSQL, SELECT statements can return constant values
 --     without needing to fetch data from a specific table.
 
-
+SELECT * FROM(
+    VALUES('TRUE', 'Used to give some explanations on some PostgreSQL commands. Also have asked it about syntax a couple of times.')
+) AS t1;
 
 -------------------------------------------------------------------------------

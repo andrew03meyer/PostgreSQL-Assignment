@@ -270,15 +270,15 @@ WHERE t1.total_participants >= 100;
 --     the total_cost, list all_fees and staff_costs as columns so they
 --     can be included on the invoice.
 
-SELECT ets_ts.event_no, SUM(ets_ts.staff_total) + e.management_fee as total_cost, c.client_name, c.company_name, e.management_fee, SUM(ets_ts.staff_total) AS staff_sum
+SELECT ets_ts.event_no, COALESCE(SUM(ets_ts.staff_total), 0) + COALESCE(e.management_fee, 0) AS total_cost, c.client_name, c.company_name, e.management_fee, COALESCE(SUM(ets_ts.staff_total), 0) AS staff_sum
 FROM(
-    SELECT ets.staff_no, ets.event_no, SUM(ets.hours_worked * ts.hourly_rate) staff_total
+    SELECT ets.staff_no, ets.event_no, SUM(ets.hours_worked * ts.hourly_rate) AS staff_total
     FROM event_temp_staff as ets
-    JOIN temporary_staff as ts ON ts.staff_no = ets.staff_no
+    FULL OUTER JOIN temporary_staff as ts ON ts.staff_no = ets.staff_no
     GROUP BY ets.staff_no, ets.event_no
 ) AS ets_ts
-JOIN event e ON e.event_no = ets_ts.event_no
-JOIN client c ON c.client_no = e.client_no
+FULL OUTER JOIN event e ON e.event_no = ets_ts.event_no
+FULL OUTER JOIN client c ON c.client_no = e.client_no
 GROUP BY ets_ts.event_no, e.management_fee, c.client_name, c.company_name;
 
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,

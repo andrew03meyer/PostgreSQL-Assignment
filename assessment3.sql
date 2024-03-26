@@ -85,7 +85,7 @@ CREATE TABLE Room (
 
     CONSTRAINT Meeting_Capacity CHECK (Meeting_Capacity <= 1000),
     CONSTRAINT Standing_Capacity CHECK (Standing_Capacity <= 1000),
-    CONSTRAINT Banguet_Capacity CHECK (Banguet_Capacity <= 1000)
+    CONSTRAINT Banquet_Capacity CHECK (Banquet_Capacity <= 1000)
 );
 
 CREATE TABLE Client (
@@ -118,15 +118,15 @@ CREATE TABLE Event (
 CREATE TABLE Room_Reservation (
     Event_No INT NOT NULL,
     Room_ID INT NOT NULL,
-    Start_Date_Time DATE NOT NULL,
-    End_Date_Time DATE NOT NULL,
+    Start_Date_Time TIMESTAMP NOT NULL,
+    End_Date_Time TIMESTAMP NOT NULL,
 
-    PRIMARY KEY (Event_No, Room_ID, Start_DateTime),
+    PRIMARY KEY (Event_No, Room_ID, Start_Date_Time),
 
     FOREIGN KEY (Event_No) REFERENCES Event(Event_No),
     FOREIGN KEY (Room_ID) REFERENCES Room(Room_ID),
 
-    CONSTRAINT Start_DateTime CHECK (Start_DateTime <= End_DateTime)
+    CONSTRAINT Start_Date_Time CHECK (Start_Date_Time <= End_Date_Time)
 );
 
 CREATE TABLE Event_Temp_Staff (
@@ -221,7 +221,7 @@ FROM room_reservation
   JOIN room ON room_reservation.room_id = room.room_id
   JOIN event ON room_reservation.event_no = event.event_no
   JOIN client ON event.client_no = client.client_no
-WHERE end_date_time > (start_date_time + interval '8 hours');
+WHERE end_date_time - start_date_time > interval '8 hours';
 
 -- 2.2 Who are the three temporary staff members that have worked the most hours?
 --     Show their first_name, surname, and the total number of hours worked.
@@ -253,10 +253,15 @@ ORDER BY total DESC;
 --     However, it only lists the clients who have booked events with
 --     at least 100 adults. Please rewrite the query to fix all problems.
 
-SELECT c.client_name, c.company_name
-FROM Client c
-  JOIN Event e ON c.client_no = e.client_no
-WHERE e.number_adults + e.number_children >= 100;
+SELECT t1.client_name, t1.company_name
+FROM (
+    SELECT c.client_name, c.company_name, SUM(e.number_adults + e.number_children) AS total_participants
+    FROM Client c
+    JOIN Event e ON c.client_no = e.client_no
+    GROUP BY c.client_no
+) AS t1
+WHERE t1.total_participants >= 100;
+
 
 -- 2.5 After each event, you'll need to produce an invoice.  Write a query that
 --     calculates the total billable cost of each event *based on the cost of
@@ -279,13 +284,18 @@ GROUP BY ets_ts.event_no, e.management_fee, c.client_name, c.company_name;
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,
 --     and return a single value, i.e. a single row, with the column total_staff_costs.
 
-SELECT SUM(t1.staff_total) AS total_staff_costs
-FROM (
-SELECT SUM(ets.hours_worked * ts.hourly_rate) staff_total
-    FROM event_temp_staff as ets
-    JOIN temporary_staff as ts ON ts.staff_no = ets.staff_no
-    GROUP BY ets.staff_no, ets.event_no
-) AS t1;
+SELECT (temp_staff + perm_staff) as total_staff_costs
+FROM
+(SELECT SUM(ets.hours_worked * ts.hourly_rate) as temp_staff
+    FROM Event_Temp_Staff AS ets
+    JOIN Temporary_Staff AS ts on ts.staff_no = ets.staff_no
+    JOIN Event AS e ON e.event_no = ets.event_no
+    WHERE EXTRACT(YEAR FROM e.booking_date) = 2023
+) as t1,
+(SELECT SUM(annual_salary) as perm_staff
+    FROM Permanent_Staff
+)as t2;
+
 
 -- 2.7 As part of a promotion for new clients, you won't charge management fees
 --     for events with a booking date in March 2024.

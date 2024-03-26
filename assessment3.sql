@@ -284,15 +284,15 @@ GROUP BY ets_ts.event_no, e.management_fee, c.client_name, c.company_name;
 -- 2.6 Calculate the total cost of *ALL* staff for last year, i.e., 2023,
 --     and return a single value, i.e. a single row, with the column total_staff_costs.
 
-SELECT (temp_staff + perm_staff) as total_staff_costs
+SELECT (ts_cost + ps_cost) as total_staff_costs
 FROM
-(SELECT SUM(ets.hours_worked * ts.hourly_rate) as temp_staff
+(SELECT SUM(ets.hours_worked * ts.hourly_rate) as ts_cost
     FROM Event_Temp_Staff AS ets
-    JOIN Temporary_Staff AS ts on ts.staff_no = ets.staff_no
+    JOIN Temporary_Staff AS ts ON ts.staff_no = ets.staff_no
     JOIN Event AS e ON e.event_no = ets.event_no
     WHERE EXTRACT(YEAR FROM e.booking_date) = 2023
 ) as t1,
-(SELECT SUM(annual_salary) as perm_staff
+(SELECT SUM(annual_salary) as ps_cost
     FROM Permanent_Staff
 )as t2;
 
